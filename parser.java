@@ -657,8 +657,62 @@ public class parser extends java_cup.runtime.lr_parser {
     ToyLexScanner lexer;
   parser(ToyLexScanner lexer){ this.lexer=lexer; }
 
+    public Symbol parse() throws Exception
+    {
+        Symbol lhs_sym = null;
+        this.production_tab = this.production_table();
+        this.action_tab = this.action_table();
+        this.reduce_tab = this.reduce_table();
+        this.init_actions();
+        this.user_init();
+        this.cur_token = this.scan();
+        this.stack.removeAllElements();
+        this.stack.push(this.getSymbolFactory().startSymbol("START", 0, this.start_state()));
+        this.tos = 0;
+        this._done_parsing = false;
+        while (!this._done_parsing) {
+            if (this.cur_token.used_by_parser) {
+                throw new Error("Symbol recycling detected (fix your scanner).");
+            }
+            short act = this.get_action(((Symbol)this.stack.peek()).parse_state, this.cur_token.sym);
+            if (act > 0) {
+                this.cur_token.parse_state = act - 1;
+                this.cur_token.used_by_parser = true;
+                this.stack.push(this.cur_token);
+                System.out.println("Shift " + this.cur_token);
+                ++this.tos;
+                this.cur_token = this.scan();
+                continue;
+            }
+            if (act < 0) {
+                lhs_sym = this.do_action(- act - 1, this, this.stack, this.tos);
+                short lhs_sym_num = this.production_tab[- act - 1][0];
+                int handle_size = this.production_tab[- act - 1][1];
+                for (int i = 0; i < handle_size; ++i) {
+                    this.stack.pop();
+                    --this.tos;
+                }
+                act = this.get_reduce(((Symbol)this.stack.peek()).parse_state, lhs_sym_num);
+                System.out.println("Reduce " + lhs_sym_num);
+                lhs_sym.parse_state = act;
+                lhs_sym.used_by_parser = true;
+                this.stack.push(lhs_sym);
+                ++this.tos;
+                continue;
+            }
+            if (act != 0) continue;
+            this.syntax_error(this.cur_token);
+            if (!this.error_recovery(false)) {
+                this.unrecovered_syntax_error(this.cur_token);
+                this.done_parsing();
+                continue;
+            }
+            lhs_sym = (Symbol)this.stack.peek();
+        }
+        return lhs_sym;
+    }
 
-/** Cup generated class to encapsulate user supplied action code.*/
+  /** Cup generated class to encapsulate user supplied action code.*/
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 class CUP$parser$actions {
   private final parser parser;
