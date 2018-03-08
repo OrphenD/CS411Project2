@@ -1,8 +1,10 @@
 /*
-* CS 411 Project 1 Lexical Analyzer
+* CS 411 Project 2 Lexical Analyzer
 * Name: Gerianna Geminiano, Andrew Quach
 */
 import java.io.*;
+import java_cup.runtime.Symbol;
+import java_cup.runtime.Scanner;
 
 %%
 %class ToyLexScanner
@@ -33,12 +35,6 @@ import java.io.*;
     public void printTrie()
     {
       dataTrie.print("OUTPUT.txt");
-    }
-
-  // Print the tokens as their associated integers
-    public void printLexerOutput()
-    {
-        writeTo(lexerOutput);
     }
 
   // Overwrite file OUTPUT.txt
@@ -210,11 +206,11 @@ StringChar = [^\r\n\"\\. ]
   \"              {yybegin(STRING);}
 
   /* COMMENTS */
-  {Comment}       {writeTo("\n");}
+  {Comment}       {}
 
   {WhiteSpace}    { /* do nothing */}
 
-  \n              {writeTo("\r\n");}
+  {EndOfLine}     { /* do nothing */}
 
   .               { /* do nothing */}
 }

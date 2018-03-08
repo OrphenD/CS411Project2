@@ -3,7 +3,7 @@ import java_cup.runtime.*;
 parser code {:
     // Connect this parser to a scanner!
     ToyLexScanner lexer;
-    Parser(ToyLexScanner lexer){ this.lexer = lexer; }
+    parser(ToyLexScanner lexer){ this.lexer = lexer; }
 :}
 
 /* define how to connect to the scanner! */
@@ -35,6 +35,7 @@ non terminal Decl;
 non terminal VarDecl; 
 non terminal Variable;
 non terminal Type;
+non terminal TypeP;
 non terminal FuncDecl; 
 non terminal Formals; 
 non terminal ClassDecl; 
@@ -49,6 +50,7 @@ non terminal OMVarDecl;
 non terminal OMStmt; 
 non terminal Stmt;
 non terminal IfStmt;
+non terminal ElseStmt;
 non terminal WhileStmt;
 non terminal ForStmt ;
 non terminal BreakStmt;
@@ -88,31 +90,27 @@ Decl ::= VarDecl
 VarDecl ::= Variable SEMI;
 Variable ::= Type ID;
 
-Type ::= INT 
-| DOUBLE 
-| BOOL
-| STRING 
-| Type LEFT_BRKT RIGHT_BRKT
-| ID;
+Type ::= INT TypeP
+| DOUBLE TypeP
+| BOOL TypeP
+| STRING TypeP
+| ID TypeP;
+
+TypeP ::= 
+	| LEFT_BRKT RIGHT_BRKT TypeP;
 
 FuncDecl ::= Type ID LEFT_PAREN Formals RIGHT_PAREN StmtBlock 
 | VOID ID LEFT_PAREN Formals RIGHT_PAREN StmtBlock 
 | Type ID LEFT_PAREN RIGHT_PAREN StmtBlock 
-| VOID ID LEFT_PAREN RIGHT_PAREN StmtBlock ;
+| VOID ID LEFT_PAREN RIGHT_PAREN StmtBlock;
 
 Formals ::= Variable 
 | Variable COMMA Formals;
 
-ClassDecl ::=
-// no extends, no implements, field +
-CLASS ID LEFT_BRACE OMField RIGHT_BRACE
-// 1 extends , no implements, field +
+ClassDecl ::=  CLASS ID EXTENDS ID IMPLEMENTS OMID LEFT_BRACE OMField RIGHT_BRACE 
 | CLASS ID EXTENDS ID LEFT_BRACE OMField RIGHT_BRACE 
-// no extends, 1 implements , field +
 | CLASS ID IMPLEMENTS OMID LEFT_BRACE OMField RIGHT_BRACE 
-// 1 extends , no implements , field +
-| CLASS ID EXTENDS ID IMPLEMENTS OMID LEFT_BRACE OMField RIGHT_BRACE 
-// Without fields
+| CLASS ID LEFT_BRACE OMField RIGHT_BRACE
 | CLASS ID LEFT_BRACE RIGHT_BRACE 
 | CLASS ID EXTENDS ID LEFT_BRACE RIGHT_BRACE 
 | CLASS ID IMPLEMENTS OMID LEFT_BRACE RIGHT_BRACE 
@@ -159,16 +157,18 @@ Stmt ::= SEMI
 | PrintStmt
 | StmtBlock ;
 
-IfStmt ::= IF LEFT_PAREN Expr RIGHT_PAREN Stmt ELSE Stmt
-	| IF LEFT_PAREN Expr RIGHT_PAREN Stmt; 
+IfStmt ::= IF LEFT_PAREN Expr RIGHT_PAREN Stmt ElseStmt;
+
+ElseStmt ::= 
+	| ELSE Stmt;
 
 WhileStmt ::= WHILE LEFT_PAREN Expr RIGHT_PAREN Stmt ;
 
 
-ForStmt ::= FOR LEFT_PAREN SEMI Expr SEMI RIGHT_PAREN Stmt 
+ForStmt ::= FOR LEFT_PAREN Expr SEMI Expr SEMI Expr RIGHT_PAREN Stmt
 | FOR LEFT_PAREN Expr SEMI Expr SEMI RIGHT_PAREN Stmt 
 | FOR LEFT_PAREN SEMI Expr SEMI Expr RIGHT_PAREN Stmt 
-| FOR LEFT_PAREN Expr SEMI Expr SEMI Expr RIGHT_PAREN Stmt ;
+| FOR LEFT_PAREN SEMI Expr SEMI RIGHT_PAREN Stmt ;
 
 
 BreakStmt ::= BREAK SEMI;
