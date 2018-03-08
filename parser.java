@@ -692,6 +692,8 @@ public class parser extends java_cup.runtime.lr_parser {
     ToyLexScanner lexer;
     parser(ToyLexScanner lexer){ this.lexer = lexer; }
 
+    String output = "Output:";
+
 
   public Symbol parse() throws Exception
   {
@@ -733,6 +735,7 @@ public class parser extends java_cup.runtime.lr_parser {
           --this.tos;
         }
         System.out.println("Reduce " + (- act - 1));
+        output += " " + (-act - 1) + ",";
         act = this.get_reduce(((Symbol)this.stack.peek()).parse_state, lhs_sym_num);
         lhs_sym.parse_state = act;
         lhs_sym.used_by_parser = true;
@@ -750,6 +753,7 @@ public class parser extends java_cup.runtime.lr_parser {
       }
       lhs_sym = (Symbol)this.stack.peek();
     }
+    System.out.println(output);
     return lhs_sym;
   }
 

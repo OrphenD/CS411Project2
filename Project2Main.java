@@ -7,7 +7,7 @@ public class Project2Main
      * Simple test driver for the java parser. Just runs it on some
      * input files, gives no useful output.
      */
-    public static void main(String argv[])
+    public static void main(String args[])
     {
         try
         {
