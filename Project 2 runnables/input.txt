@@ -1,5 +1,0 @@
-int i () {
-	boolean x;
-	x + y;
-	integer + var;
-}
