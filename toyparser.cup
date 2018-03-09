@@ -5,7 +5,95 @@ import java_cup.runtime.Scanner;
 parser code {:
     // Connect this parser to a scanner!
     ToyLexScanner lexer;
-    ToyParser(ToyLexScanner lexer){ this.lexer = lexer; }
+    ToyParser(ToyLexScanner lexer){ 
+	this.lexer = lexer;
+	createFile(); 
+}
+
+    String output = "Output:";
+
+    public void createFile(){
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter("OUTPUT.txt",false))) {
+      bw.write("");
+      bw.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  //Append to file OUTPUT.txt
+  public void writeTo(String token){
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter("OUTPUT.txt",true))) {
+      bw.write(token);
+      bw.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public Symbol parse() throws Exception
+  {
+    Symbol lhs_sym = null;
+    this.production_tab = this.production_table();
+    this.action_tab = this.action_table();
+    this.reduce_tab = this.reduce_table();
+    this.init_actions();
+    this.user_init();
+    this.cur_token = this.scan();
+    writeTo("Current Symbol: " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")\r\n");
+    this.stack.removeAllElements();
+    this.stack.push(this.getSymbolFactory().startSymbol("START", 0, this.start_state()));
+    //System.out.println("Stack: " + this.stack.toString());
+    this.tos = 0;
+    this._done_parsing = false;
+    while (!this._done_parsing) {
+      if (this.cur_token.used_by_parser) {
+        throw new Error("Symbol recycling detected (fix your scanner).");
+      }
+      short act = this.get_action(((Symbol)this.stack.peek()).parse_state, this.cur_token.sym);
+      if (act > 0) {
+        this.cur_token.parse_state = act - 1;
+        this.cur_token.used_by_parser = true;
+        this.stack.push(this.cur_token);
+        writeTo("Shift " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")\r\n");
+        //System.out.println("Stack: " + this.stack.toString());
+        ++this.tos;
+        this.cur_token = this.scan();
+        writeTo("# Current token is " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")\r\n");
+        continue;
+      }
+      if (act < 0) {
+        lhs_sym = this.do_action(- act - 1, this, this.stack, this.tos);
+        short lhs_sym_num = this.production_tab[- act - 1][0];
+        int handle_size = this.production_tab[- act - 1][1];
+        for (int i = 0; i < handle_size; ++i) {
+          this.stack.pop();
+          --this.tos;
+        }
+        writeTo("Reduce " + (- act - 1) + "\r\n");
+        output += " " + (-act - 1) + ",";
+        act = this.get_reduce(((Symbol)this.stack.peek()).parse_state, lhs_sym_num);
+        lhs_sym.parse_state = act;
+        lhs_sym.used_by_parser = true;
+        this.stack.push(lhs_sym);
+        //System.out.println("Stack: " + this.stack.toString());
+        ++this.tos;
+        continue;
+      }
+      if (act != 0) continue;
+      this.syntax_error(this.cur_token);
+      if (!this.error_recovery(false)) {
+        this.unrecovered_syntax_error(this.cur_token);
+        this.done_parsing();
+        continue;
+      }
+      lhs_sym = (Symbol)this.stack.peek();
+    }
+    writeTo(output +"\r\n");
+    return lhs_sym;
+  }
+	
+
 :}
 
 /* define how to connect to the scanner! */
@@ -60,7 +148,8 @@ non terminal ReturnStmt;
 non terminal PrintStmt;
 non terminal OMExpr; 
 non terminal Expr; 
-non terminal Lvalue; 
+non terminal Lvalue;
+non terminal LvalueP; 
 non terminal Call; 
 non terminal Actuals; 
 non terminal Constant; 
@@ -209,16 +298,20 @@ Expr ::= Lvalue ASSIGN Expr
 | READLN LEFT_PAREN RIGHT_PAREN 
 | NEWARRAY LEFT_PAREN INT_CONST COMMA Type RIGHT_PAREN ;
  
-Lvalue ::= ID 
-| Lvalue LEFT_BRKT Expr RIGHT_BRKT 
-| Lvalue PERIOD ID ;
+Lvalue ::= ID LvalueP;
+
+LvalueP ::= LEFT_BRKT Expr RIGHT_BRKT LvalueP 
+	| PERIOD ID LvalueP
+	| ;
 
 
 Call ::= ID LEFT_PAREN Actuals RIGHT_PAREN 
 | ID PERIOD ID LEFT_PAREN Actuals RIGHT_PAREN 
 | ID LEFT_PAREN RIGHT_PAREN 
 | ID PERIOD ID LEFT_PAREN RIGHT_PAREN ;
+
 Actuals ::= OMExpr;
+
 Constant ::=  INT_CONST
 | DOUBLE_CONST
 | STRING_CONST

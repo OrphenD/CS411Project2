@@ -419,8 +419,6 @@ class ToyLexScanner implements java_cup.runtime.Scanner {
    */
   ToyLexScanner(java.io.Reader in) {
       dataTrie = new Trie(500);
-    createFile();
-
     this.zzReader = in;
   }
 

@@ -106,5 +106,40 @@ public class sym {
   "BOOL_CONST",
   "ID"
   };
+
+  /* non terminals */
+  static final int ReturnStmt = 24;
+  static final int ElseStmt = 20;
+  static final int Call = 30;
+  static final int ForStmt = 22;
+  static final int InterDecl = 12;
+  static final int Formals = 7;
+  static final int Constant = 32;
+  static final int Stmt = 18;
+  static final int OMStmt = 17;
+  static final int PrintStmt = 25;
+  static final int Field = 11;
+  static final int Actuals = 31;
+  static final int Expr = 27;
+  static final int OMExpr = 26;
+  static final int ClassDecl = 8;
+  static final int Decl = 1;
+  static final int Type = 4;
+  static final int TypeP = 5;
+  static final int OMField = 10;
+  static final int VarDecl = 2;
+  static final int OMPrototype = 13;
+  static final int BreakStmt = 23;
+  static final int Prototype = 14;
+  static final int WhileStmt = 21;
+  static final int StmtBlock = 15;
+  static final int Variable = 3;
+  static final int OMID = 9;
+  static final int Lvalue = 28;
+  static final int IfStmt = 19;
+  static final int FuncDecl = 6;
+  static final int LvalueP = 29;
+  static final int Program = 0;
+  static final int OMVarDecl = 16;
 }
 

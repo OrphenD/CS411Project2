@@ -11,13 +11,22 @@ public class Project2Main
     {
         try
         {
-            System.out.println("Parsing " + args[0]);
-            ToyLexScanner lexer = new ToyLexScanner(new FileReader(args[0]));
+            System.out.println("Parsing ");
+            ToyLexScanner lexer = new ToyLexScanner(new FileReader("input.txt"));
             parser p = new parser(lexer);
             p.parse();
             System.out.println("No errors.");
         }
         catch (Exception e) {
+
+
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter("OUTPUT.txt",true))) {
+                bw.write("ERROR");
+                bw.close();
+            } catch (IOException ex) {
+                e.printStackTrace();
+            }
+
             e.printStackTrace(System.out);
             System.exit(1);
         }
