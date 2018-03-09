@@ -100,7 +100,7 @@ MultiLineComment = "/*" ~"*/" | "/*" [^"*/"]* "*/"
 Comment = {MultiLineComment} | {SingleLineComment}
 
 // String cannot include a new line (\r\n) or double qoute (")
-StringChar = [^\r\n\"\\. ]
+StringChar = [^\r\n\"\\.]
 
 %state STRING
 %%
@@ -216,6 +216,7 @@ StringChar = [^\r\n\"\\. ]
 }
 
 <STRING> {
+
   /* ERRORS */
   \\.             { throw new RuntimeException("Illegal new line \""+yytext()+"\" in string."); }
   {EndOfLine}     {throw new RuntimeException("Unterminated string at end of line"); }

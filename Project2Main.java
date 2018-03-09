@@ -11,8 +11,8 @@ public class Project2Main
     {
         try
         {
-            System.out.println("Parsing input.txt");
-            ToyLexScanner lexer = new ToyLexScanner(new FileReader("input.txt"));
+            System.out.println("Parsing " + args[0]);
+            ToyLexScanner lexer = new ToyLexScanner(new FileReader(args[0]));
             parser p = new parser(lexer);
             p.parse();
             System.out.println("No errors.");
