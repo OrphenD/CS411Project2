@@ -7,6 +7,10 @@ import java_cup.runtime.Symbol;
 import java_cup.runtime.lr_parser;
 import java_cup.runtime.Scanner;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
   */
 @SuppressWarnings({"rawtypes"})
@@ -690,10 +694,32 @@ public class parser extends java_cup.runtime.lr_parser {
 
     // Connect this parser to a scanner!
     ToyLexScanner lexer;
-    parser(ToyLexScanner lexer){ this.lexer = lexer; }
+    parser(ToyLexScanner lexer)
+    {
+      this.lexer = lexer;
+      createFile();
+    }
 
     String output = "Output:";
 
+  public void createFile(){
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter("OUTPUT.txt",false))) {
+      bw.write("");
+      bw.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  //Append to file OUTPUT.txt
+  public void writeTo(String token){
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter("OUTPUT.txt",true))) {
+      bw.write(token);
+      bw.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   public Symbol parse() throws Exception
   {
@@ -704,7 +730,7 @@ public class parser extends java_cup.runtime.lr_parser {
     this.init_actions();
     this.user_init();
     this.cur_token = this.scan();
-    System.out.println("Current Symbol: " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")");
+    writeTo("Current Symbol: " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")\r\n");
     this.stack.removeAllElements();
     this.stack.push(this.getSymbolFactory().startSymbol("START", 0, this.start_state()));
     //System.out.println("Stack: " + this.stack.toString());
@@ -719,11 +745,11 @@ public class parser extends java_cup.runtime.lr_parser {
         this.cur_token.parse_state = act - 1;
         this.cur_token.used_by_parser = true;
         this.stack.push(this.cur_token);
-        System.out.println("Shift " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")");
+        writeTo("Shift " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")\r\n");
         //System.out.println("Stack: " + this.stack.toString());
         ++this.tos;
         this.cur_token = this.scan();
-        System.out.println("# Current token is " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")");
+        writeTo("# Current token is " + sym.terminalNames[this.cur_token.sym] + "(" + this.cur_token + ")\r\n");
         continue;
       }
       if (act < 0) {
@@ -734,7 +760,7 @@ public class parser extends java_cup.runtime.lr_parser {
           this.stack.pop();
           --this.tos;
         }
-        System.out.println("Reduce " + (- act - 1));
+        writeTo("Reduce " + (- act - 1) + "\r\n");
         output += " " + (-act - 1) + ",";
         act = this.get_reduce(((Symbol)this.stack.peek()).parse_state, lhs_sym_num);
         lhs_sym.parse_state = act;
@@ -753,7 +779,7 @@ public class parser extends java_cup.runtime.lr_parser {
       }
       lhs_sym = (Symbol)this.stack.peek();
     }
-    System.out.println(output);
+    writeTo(output +"\r\n");
     return lhs_sym;
   }
 
